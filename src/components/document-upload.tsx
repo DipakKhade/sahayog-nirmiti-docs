@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { Upload, File, X, CheckCircle, AlertCircle } from "lucide-react"
+import { Upload, File, X, CheckCircle, AlertCircle, FolderOpen } from "lucide-react"
+import { DocumentViewerModal } from "./document-viewer-modal"
 
 interface UploadedFile {
   id: string
@@ -17,11 +18,13 @@ interface UploadedFile {
   type: string
   status: "uploading" | "completed" | "error"
   progress: number
+  uploadDate?: Date
 }
 
 export function DocumentUpload() {
   const [files, setFiles] = useState<UploadedFile[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes"
@@ -38,7 +41,9 @@ export function DocumentUpload() {
       if (progress >= 100) {
         progress = 100
         clearInterval(interval)
-        setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: "completed", progress: 100 } : f)))
+        setFiles((prev) =>
+          prev.map((f) => (f.id === fileId ? { ...f, status: "completed", progress: 100, uploadDate: new Date() } : f)),
+        )
       } else {
         setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, progress: Math.round(progress) } : f)))
       }
@@ -59,7 +64,6 @@ export function DocumentUpload() {
 
     setFiles((prev) => [...prev, ...newFiles])
 
-    // Simulate upload for each file
     newFiles.forEach((file) => {
       simulateUpload(file.id)
     })
@@ -119,8 +123,18 @@ export function DocumentUpload() {
       {/* Upload Area */}
       <Card>
         <CardHeader>
-          <CardTitle>Upload Documents</CardTitle>
-          <CardDescription>Drag and drop your files here or click to browse</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Upload Documents</CardTitle>
+              <CardDescription>Drag and drop your files here or click to browse</CardDescription>
+            </div>
+            {files.filter((f) => f.status === "completed").length > 0 && (
+              <Button variant="outline" onClick={() => setIsViewerOpen(true)}>
+                <FolderOpen className="h-4 w-4 mr-2" />
+                View Documents ({files.filter((f) => f.status === "completed").length})
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <div
@@ -157,8 +171,8 @@ export function DocumentUpload() {
       {files.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Uploaded Files ({files.length})</CardTitle>
-            <CardDescription>Manage your uploaded documents</CardDescription>
+            <CardTitle>Recent Uploads ({files.length})</CardTitle>
+            <CardDescription>Current upload progress and recently uploaded files</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -192,6 +206,14 @@ export function DocumentUpload() {
           Files are uploaded securely and stored safely. Maximum file size is 10MB per file.
         </AlertDescription>
       </Alert>
+
+      {/* DocumentViewerModal */}
+      <DocumentViewerModal
+        isOpen={isViewerOpen}
+        onClose={() => setIsViewerOpen(false)}
+        files={files}
+        onDeleteFile={removeFile}
+      />
     </div>
   )
 }
