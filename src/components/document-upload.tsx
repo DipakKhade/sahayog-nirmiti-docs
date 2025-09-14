@@ -34,22 +34,6 @@ export function DocumentUpload() {
     return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
   }
 
-  const simulateUpload = (fileId: string) => {
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += Math.random() * 30
-      if (progress >= 100) {
-        progress = 100
-        clearInterval(interval)
-        setFiles((prev) =>
-          prev.map((f) => (f.id === fileId ? { ...f, status: "completed", progress: 100, uploadDate: new Date() } : f)),
-        )
-      } else {
-        setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, progress: Math.round(progress) } : f)))
-      }
-    }, 200)
-  }
-
   const handleFileSelect = useCallback((selectedFiles: FileList | null) => {
     if (!selectedFiles) return
 
@@ -64,8 +48,8 @@ export function DocumentUpload() {
 
     setFiles((prev) => [...prev, ...newFiles])
 
-    newFiles.forEach((file) => {
-      simulateUpload(file.id)
+    newFiles.forEach((file, index) => {
+        uploadFile(selectedFiles[index], file.id);
     })
   }, [])
 
@@ -117,6 +101,50 @@ export function DocumentUpload() {
         return <Badge variant="outline">Uploading</Badge>
     }
   }
+
+  const uploadFile = (file: File, fileId: string) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append("file", file);
+  
+    xhr.open("POST", "/api/upload_doc");
+  
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const progress = Math.round((event.loaded / event.total) * 100);
+        setFiles((prev) =>
+          prev.map((f) => (f.id === fileId ? { ...f, progress } : f))
+        );
+      }
+    };
+  
+    // On success
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        setFiles((prev) =>
+          prev.map((f) =>
+            f.id === fileId
+              ? { ...f, status: "completed", progress: 100, uploadDate: new Date() }
+              : f
+          )
+        );
+      } else {
+        setFiles((prev) =>
+          prev.map((f) => (f.id === fileId ? { ...f, status: "error" } : f))
+        );
+      }
+    };
+  
+    // On error
+    xhr.onerror = () => {
+      setFiles((prev) =>
+        prev.map((f) => (f.id === fileId ? { ...f, status: "error" } : f))
+      );
+    };
+  
+    xhr.send(formData);
+  };
+  
 
   return (
     <div className="space-y-6">
