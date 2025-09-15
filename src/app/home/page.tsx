@@ -18,8 +18,8 @@ export default function HomePage() {
         <main className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-foreground mb-2">Document Manager</h1>
-              <p className="text-muted-foreground">Upload and manage your documents securely</p>
+              <h1 className="text-3xl font-bold text-foreground mb-2">Upload Documents</h1>
+              {/* <p className="text-muted-foreground">Upload your documents securely</p> */}
             </div>
             <div>
             <div className="flex flex-col gap-4 mb-6">
@@ -32,10 +32,10 @@ export default function HomePage() {
                 <SelectValue placeholder="Select Document Type" />
             </SelectTrigger>
             <SelectContent>
-                <SelectItem value="light">MTC</SelectItem>
-                <SelectItem value="dark">PTC</SelectItem>
-                <SelectItem value="system">PDI</SelectItem>
-                <SelectItem value="system">Other</SelectItem>
+                <SelectItem value="MTC">MTC</SelectItem>
+                <SelectItem value="PTC">PTC</SelectItem>
+                <SelectItem value="PDI">PDI</SelectItem>
+                <SelectItem value="OTHER">Other</SelectItem>
             </SelectContent>
             </Select>
         </div>

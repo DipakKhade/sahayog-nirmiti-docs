@@ -28,7 +28,7 @@ export function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <h2 className="text-xl font-semibold">Dashboard</h2>
+            <h2 className="text-xl font-semibold">सहयोग निर्मिती</h2>
           </div>
 
           <div className="flex items-center space-x-4">
