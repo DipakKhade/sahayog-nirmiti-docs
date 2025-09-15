@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Upload, File, X, CheckCircle, AlertCircle, FolderOpen } from "lucide-react"
 import { DocumentViewerModal } from "./document-viewer-modal"
+import { formatFileSize } from "@/lib/common-functions"
 
 interface UploadedFile {
   id: string
@@ -20,22 +21,14 @@ interface UploadedFile {
   uploadDate?: Date
 }
 
+
 export function DocumentUpload() {
   const [files, setFiles] = useState<UploadedFile[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes"
-    const k = 1024
-    const sizes = ["Bytes", "KB", "MB", "GB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
-  }
-
   const handleFileSelect = useCallback((selectedFiles: FileList | null) => {
     if (!selectedFiles) return
-
     const newFiles: UploadedFile[] = Array.from(selectedFiles).map((file) => ({
       id: Math.random().toString(36).substr(2, 9),
       name: file.name,
@@ -44,19 +37,17 @@ export function DocumentUpload() {
       status: "uploading" as const,
       progress: 0,
     }))
-
     setFiles((prev) => [...prev, ...newFiles])
-
     newFiles.forEach((file, index) => {
-        uploadFile(selectedFiles[index], file.id);
+        uploadFileToServer(selectedFiles[index], file.id);
     })
   }, [])
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault()
-      setIsDragOver(false)
-      handleFileSelect(e.dataTransfer.files)
+  const handleFileDrop = useCallback((e: React.DragEvent) => {
+    console.log(e)
+    e.preventDefault()
+    setIsDragOver(false)
+    handleFileSelect(e.dataTransfer.files)
     },
     [handleFileSelect],
   )
@@ -86,22 +77,9 @@ export function DocumentUpload() {
     }
   }
 
-  const getStatusBadge = (status: UploadedFile["status"]) => {
-    switch (status) {
-      case "completed":
-        return (
-          <Badge variant="secondary" className="text-green-700 bg-green-100">
-            Completed
-          </Badge>
-        )
-      case "error":
-        return <Badge variant="destructive">Error</Badge>
-      case "uploading":
-        return <Badge variant="outline">Uploading</Badge>
-    }
-  }
 
-  const uploadFile = (file: File, fileId: string) => {
+
+  const uploadFileToServer = (file: File, fileId: string) => {
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
     formData.append("file", file);
@@ -168,7 +146,7 @@ export function DocumentUpload() {
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
               isDragOver ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-muted-foreground/50"
             }`}
-            onDrop={handleDrop}
+            onDrop={handleFileDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
           >
@@ -243,4 +221,20 @@ export function DocumentUpload() {
       />
     </div>
   )
+}
+
+
+const getStatusBadge = (status: UploadedFile["status"]) => {
+switch (status) {
+    case "completed":
+    return (
+        <Badge variant="secondary" className="text-green-700 bg-green-100">
+        Completed
+        </Badge>
+    )
+    case "error":
+    return <Badge variant="destructive">Error</Badge>
+    case "uploading":
+    return <Badge variant="outline">Uploading</Badge>
+}
 }
