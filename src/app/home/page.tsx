@@ -1,5 +1,6 @@
 import { DocumentUpload } from "@/components/document-upload"
 import { Header } from "@/components/header"
+import DocDetails from "@/components/ui/doc-details"
 
 export default function HomePage() {
   return (
@@ -11,7 +12,10 @@ export default function HomePage() {
               <h1 className="text-3xl font-bold text-foreground mb-2">Document Manager</h1>
               <p className="text-muted-foreground">Upload and manage your documents securely</p>
             </div>
+            <div>
+            <DocDetails/>
             <DocumentUpload />
+            </div>
           </div>
         </main>
       </div>
