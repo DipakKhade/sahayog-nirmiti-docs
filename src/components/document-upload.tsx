@@ -21,7 +21,6 @@ interface UploadedFile {
   uploadDate?: Date
 }
 
-
 export function DocumentUpload() {
   const [files, setFiles] = useState<UploadedFile[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
