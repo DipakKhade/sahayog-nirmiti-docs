@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
         select: {
             username: true,
             password: true,
+            type:true,
             vendorCode: true
         }
     })
@@ -27,17 +28,26 @@ export async function POST(req: NextRequest) {
     if(user_password !== user?.password || !user) {
         return NextResponse.json({
             success: false,
-            message: "invalid cred"
+            message: "invalid credentionals"
         })
     }
 
     const token = jwt.sign({username,vendor_code: user.vendorCode}, process.env.JWT_SEC!)
 
     
-    return NextResponse.json({
+    let res =  NextResponse.json({
         success: true,
         message: "Sign in successful",
+        user_type: user.type,
         token
     })
+
+    res.cookies.set("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+    })
+    return res
 
 }

@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, User, Lock } from "lucide-react"
 import axios from "axios";
+import { toast } from "sonner"
 
 export function LoginForm() {
   const [username, setUsername] = useState("")
@@ -30,19 +30,39 @@ export function LoginForm() {
       return
     }
 
+    if(!window.navigator.onLine) {
+        toast.error("Please check your internet connection")
+        setIsLoading(false)
+        return;
+    }
+
     try {
         const response = await axios.post("/api/auth/sign_in", {
           username: username,
           password: password
         });
-        console.log(response.data);
+
         if(response.data.success === true) {
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("username", username);
-            router.push("/home");
+            if(response.data.user_type === "SUPPLIER") {
+                router.push("/s/home");
+            } else if(response.data.user_type === "ADMIN") {
+                router.push("/a/home");
+            }
+            toast.success("Login Successful", {style: {
+                color: "green"
+            }});
+        } else {
+            toast.error(response.data.message ?? 'some error occured')
         }
     } catch (err) {
-      setError("Login failed. Please try again.")
+        toast.error('SignIn failed, Please try again', {
+            style: {
+                color: 'red'
+            }
+        })
+
     } finally {
       setIsLoading(false)
     }
@@ -56,12 +76,6 @@ export function LoginForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="username">Username</Label>
             <div className="relative">

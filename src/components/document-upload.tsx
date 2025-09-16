@@ -61,23 +61,12 @@ export function DocumentUpload() {
     setIsDragOver(false)
   }, [])
 
+
   const removeFile = (fileId: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== fileId))
   }
 
-  const getStatusIcon = (status: UploadedFile["status"]) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      case "error":
-        return <AlertCircle className="h-4 w-4 text-red-500" />
-      default:
-        return <File className="h-4 w-4 text-blue-500" />
-    }
-  }
-
-
-
+  
   const uploadFileToServer = (file: File, fileId: string) => {
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
@@ -152,7 +141,8 @@ export function DocumentUpload() {
             <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <div className="space-y-2">
               <p className="text-lg font-medium">Drop files here to upload</p>
-              <p className="text-sm text-muted-foreground">Supports PDF, DOC, DOCX, TXT, and image files</p>
+              <p className="text-sm text-muted-foreground">Supports PDF files</p>
+              {/* , DOC, DOCX, TXT, and image */}
             </div>
             <div className="mt-4">
               <Button onClick={() => document.getElementById("file-input")?.click()} variant="outline">
@@ -164,44 +154,16 @@ export function DocumentUpload() {
                 multiple
                 className="hidden"
                 onChange={(e) => handleFileSelect(e.target.files)}
-                accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
-              />
+                accept=".pdf"
+                // ,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif
+                />
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* File List */}
-      {files.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Uploads ({files.length})</CardTitle>
-            <CardDescription>Current upload progress and recently uploaded files</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {files.map((file) => (
-                <div key={file.id} className="flex items-center space-x-4 p-4 border rounded-lg">
-                  <div className="flex-shrink-0">{getStatusIcon(file.status)}</div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-medium truncate">{file.name}</p>
-                      {getStatusBadge(file.status)}
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-2">{formatFileSize(file.size)}</p>
-                    {file.status === "uploading" && <Progress value={file.progress} className="h-2" />}
-                  </div>
-
-                  <Button variant="ghost" size="sm" onClick={() => removeFile(file.id)} className="flex-shrink-0">
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      
 
       {/* Info Alert */}
       <Alert>
@@ -236,4 +198,49 @@ switch (status) {
     case "uploading":
     return <Badge variant="outline">Uploading</Badge>
 }
+}
+
+const fileList = (files: UploadedFile[]) => {
+    const getStatusIcon = (status: UploadedFile["status"]) => {
+        switch (status) {
+          case "completed":
+            return <CheckCircle className="h-4 w-4 text-green-500" />
+          case "error":
+            return <AlertCircle className="h-4 w-4 text-red-500" />
+          default:
+            return <File className="h-4 w-4 text-blue-500" />
+        }
+      }    
+    return <>
+        {files.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Uploads ({files.length})</CardTitle>
+            <CardDescription>Current upload progress and recently uploaded files</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {files.map((file) => (
+                <div key={file.id} className="flex items-center space-x-4 p-4 border rounded-lg">
+                  <div className="flex-shrink-0">{getStatusIcon(file.status)}</div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm font-medium truncate">{file.name}</p>
+                      {getStatusBadge(file.status)}
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">{formatFileSize(file.size)}</p>
+                    {file.status === "uploading" && <Progress value={file.progress} className="h-2" />}
+                  </div>
+
+                  {/* <Button variant="ghost" size="sm" onClick={() => removeFile(file.id)} className="flex-shrink-0">
+                    <X className="h-4 w-4" />
+                  </Button> */}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </>
 }

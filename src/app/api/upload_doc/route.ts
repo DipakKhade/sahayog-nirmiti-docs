@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
     const filePath = path.join(uploadDir, file.name);
+    console.log('filePath', filePath)
     fs.writeFileSync(filePath, buffer);
 
     return NextResponse.json({ success: true, fileName: file.name });
