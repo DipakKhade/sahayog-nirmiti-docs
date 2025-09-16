@@ -14,17 +14,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model USER {
+model User {
   id         Int        @id @default(autoincrement())
   username   String     @unique
   password   String
   type       USER_TYPE
   lastLogin  DateTime?
   vendorCode String?
-  docs       DOCUMENT[]
+  docs       Document[]
 }
 
-model DOCUMENT {
+model Document {
   id              Int      @id @default(autoincrement())
   invoiceNo       String
   purchaseOrderNo String
@@ -34,7 +34,7 @@ model DOCUMENT {
   userId          Int
   createdAt       DateTime @default(now())
 
-  user USER @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 enum USER_TYPE {

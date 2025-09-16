@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -10,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, User, Lock } from "lucide-react"
+import axios from "axios";
 
 export function LoginForm() {
   const [username, setUsername] = useState("")
@@ -24,23 +24,23 @@ export function LoginForm() {
     setIsLoading(true)
     setError("")
 
-    // Simple validation
     if (!username || !password) {
       setError("Please fill in all fields")
       setIsLoading(false)
       return
     }
 
-    // Simulate login process
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // For demo purposes, accept any username/password
-      // In a real app, you'd validate against your backend
-      localStorage.setItem("isLoggedIn", "true")
-      localStorage.setItem("username", username)
-
-      router.push("/home")
+        const response = await axios.post("/api/auth/sign_in", {
+          username: username,
+          password: password
+        });
+        console.log(response.data);
+        if(response.data.success === true) {
+            localStorage.setItem("token", response.data.token);
+            localStorage.setItem("username", username);
+            router.push("/home");
+        }
     } catch (err) {
       setError("Login failed. Please try again.")
     } finally {
