@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
             username
         }, 
         select: {
+            id: true,
             username: true,
             password: true,
             type:true,
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
         })
     }
 
-    const token = jwt.sign({username, user_type: user.type, vendor_code: user.vendorCode ?? 0, }, process.env.JWT_SEC!, {
+    const token = jwt.sign({user_id: user.id,username, user_type: user.type, vendor_code: user.vendorCode ?? 0, }, process.env.JWT_SEC!, {
         algorithm:'HS256'
     })
 

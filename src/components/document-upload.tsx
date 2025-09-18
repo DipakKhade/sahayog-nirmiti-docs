@@ -146,12 +146,12 @@ export const DocumentUpload = forwardRef<DocumentUploadRef, DocumentUploadProps>
               <CardTitle>Upload Documents</CardTitle>
               <CardDescription>Drag and drop your files here or click to browse</CardDescription>
             </div>
-            {files.filter((f) => f.status === "completed").length > 0 && (
+            {/* {files.filter((f) => f.status === "completed").length > 0 && (
               <Button variant="outline" onClick={() => setIsViewerOpen(true)}>
                 <FolderOpen className="h-4 w-4 mr-2" />
                 View Documents ({files.filter((f) => f.status === "completed").length})
               </Button>
-            )}
+            )} */}
           </div>
         </CardHeader>
         <CardContent>

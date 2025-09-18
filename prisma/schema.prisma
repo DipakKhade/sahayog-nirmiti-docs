@@ -32,6 +32,7 @@ model Document {
   partName        String
   documentType    String
   userId          Int
+  bucketKey       String
   createdAt       DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])

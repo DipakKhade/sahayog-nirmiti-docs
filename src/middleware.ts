@@ -9,52 +9,6 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SEC)
 
 const protectedRoutes = ["/a/home", "/s/home", "/"]
 
-// export async function middleware(req: NextRequest) {
-//   const { pathname } = req.nextUrl
-
-//   if (protectedRoutes.some((route) => pathname.startsWith(route))) {
-//     const token = req.cookies.get("token")?.value
-//     if (!token) {
-//       return NextResponse.redirect(new URL("/signin", req.url))
-//     }
-//     try {
-//       const data = await jose.jwtVerify(token, JWT_SECRET, {
-//         algorithms:['HS256']
-//       });
-
-//       if(data.payload){
-
-//         console.log('payload ---', data.payload)
-
-//         // if(pathname !== 'signin'){
-//           if((pathname === '/'  ) && data.payload.user_type === USER_TYPE.SUPPLIER){
-//             return NextResponse.redirect(new URL("/s/home", req.url)) 
-//           } else if (pathname === '/' && data.payload.user_type === USER_TYPE.ADMIN) {
-//             return NextResponse.redirect(new URL("/a/home", req.url))
-//           }
-//           return NextResponse.next() 
-//         // } else {
-          
-//         // }
-
-
-//       } else {
-//         if(data.payload) {
-
-//         }
-//         return NextResponse.redirect(new URL("/signin", req.url))
-//       }
-//     } catch (err) {
-//       console.log(err)
-//       return NextResponse.redirect(new URL("/", req.url))
-//     }
-//   } else {
-
-//   }
-
-//   return NextResponse.next()
-// }
-
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const token = req.cookies.get("token")?.value
@@ -65,9 +19,7 @@ export async function middleware(req: NextRequest) {
     const data = await jose.jwtVerify(token, JWT_SECRET, {
       algorithms: ["HS256"],
     })
-
     if (data.payload) {
-      console.log('i am here')
         if(data.payload.user_type === USER_TYPE.SUPPLIER){
           return NextResponse.redirect(new URL("/s/home", req.url))
         } else if(data.payload.user_type === USER_TYPE.ADMIN)
@@ -90,7 +42,9 @@ export async function middleware(req: NextRequest) {
       const data = await jose.jwtVerify(token, JWT_SECRET, {
         algorithms: ["HS256"],
       })
-
+      const userId = data.payload.user_id as string
+      const requestHeaders = new Headers(req.headers)
+      requestHeaders.set("user_id", userId) 
       if (data.payload) {
         if (
           (pathname === "/" || pathname === "/signin") &&
@@ -103,7 +57,11 @@ export async function middleware(req: NextRequest) {
         ) {
           return NextResponse.redirect(new URL("/a/home", req.url))
         }
-        return NextResponse.next()
+        return NextResponse.next({
+          request : {
+            headers: requestHeaders
+          }
+        })
       }
     } catch (err) {
       console.log("JWT error", err)

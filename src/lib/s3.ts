@@ -11,8 +11,7 @@ aws.config.update({
 
 const s3 = new aws.S3();
 
-export const uploadFilesToS3 = async (filePaths: string[]) =>{
-    console.log(filePaths)
+export const uploadFilesToS3 = async (filePaths: string[]): Promise<boolean> =>{
     try {
     const id = path.basename(path.dirname(filePaths[0]));
     const uploadPromises = filePaths
@@ -29,8 +28,9 @@ export const uploadFilesToS3 = async (filePaths: string[]) =>{
             }).promise();
         });
         await Promise.all(uploadPromises);
-        return;
+        return true;
     } catch (error) {
         console.error('Error uploading files:', error);
+        return false;
     }
 }
