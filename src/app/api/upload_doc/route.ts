@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
         }
 
         const r =  prisma.$transaction(async tx => {
-            const add_doc = await tx.document.create({
+            await tx.document.create({
                 data :{
                     documentType,
                     invoiceNo,
