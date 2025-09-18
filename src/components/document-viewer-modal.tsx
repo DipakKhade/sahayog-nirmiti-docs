@@ -1,20 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
-import { File, Download, Eye, Trash2, Calendar, FileText } from "lucide-react"
-import { DocumentPreview } from "./document-preview"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { File, Download, Trash2, Eye, Calendar } from "lucide-react"
+import { formatFileSize } from "@/lib/common-functions"
 
 interface UploadedFile {
   id: string
   name: string
   size: number
   type: string
-  status: "uploading" | "completed" | "error"
+  status: "pending" | "uploading" | "completed" | "error"
   progress: number
   uploadDate?: Date
 }
@@ -28,32 +28,8 @@ interface DocumentViewerModalProps {
 
 export function DocumentViewerModal({ isOpen, onClose, files, onDeleteFile }: DocumentViewerModalProps) {
   const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null)
-  const [previewFile, setPreviewFile] = useState<UploadedFile | null>(null)
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
-  const handlePreview = (file: UploadedFile) => {
-    setPreviewFile(file)
-    setIsPreviewOpen(true)
-  }
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes"
-    const k = 1024
-    const sizes = ["Bytes", "KB", "MB", "GB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
-  }
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  }
-
-  const getFileIcon = (type: string) => {
-    if (type.includes("pdf")) return <FileText className="h-5 w-5 text-red-500" />
-    if (type.includes("image")) return <Eye className="h-5 w-5 text-blue-500" />
-    if (type.includes("document") || type.includes("word")) return <FileText className="h-5 w-5 text-blue-600" />
-    return <File className="h-5 w-5 text-gray-500" />
-  }
+  const completedFiles = files.filter((file) => file.status === "completed")
 
   const getStatusBadge = (status: UploadedFile["status"]) => {
     switch (status) {
@@ -67,161 +43,145 @@ export function DocumentViewerModal({ isOpen, onClose, files, onDeleteFile }: Do
         return <Badge variant="destructive">Error</Badge>
       case "uploading":
         return <Badge variant="outline">Uploading</Badge>
+      case "pending":
+        return <Badge variant="secondary">Ready to upload</Badge>
     }
   }
 
-  const completedFiles = files.filter((file) => file.status === "completed")
+  const handleDownload = (file: UploadedFile) => {
+    // In a real implementation, you would fetch the file from your server
+    console.log(`Downloading file: ${file.name}`)
+  }
+
+  const handleView = (file: UploadedFile) => {
+    setSelectedFile(file)
+  }
 
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>Document Library</DialogTitle>
-            <DialogDescription>
-              View and manage your uploaded documents ({completedFiles.length} files)
-            </DialogDescription>
-          </DialogHeader>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[80vh]">
+        <DialogHeader>
+          <DialogTitle>Document Viewer</DialogTitle>
+        </DialogHeader>
 
-          <div className="flex gap-6 h-[60vh]">
-            {/* File List */}
-            <div className="flex-1">
-              <ScrollArea className="h-full pr-4">
-                <div className="space-y-3">
-                  {completedFiles.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <File className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No completed uploads yet</p>
-                      <p className="text-sm">Upload some documents to see them here</p>
-                    </div>
-                  ) : (
-                    completedFiles.map((file) => (
-                      <div
-                        key={file.id}
-                        className={`p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
-                          selectedFile?.id === file.id ? "border-primary bg-primary/5" : ""
-                        }`}
-                        onClick={() => setSelectedFile(file)}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start space-x-3 flex-1 min-w-0">
-                            {getFileIcon(file.type)}
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium truncate">{file.name}</p>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <span className="text-xs text-muted-foreground">{formatFileSize(file.size)}</span>
-                                {getStatusBadge(file.status)}
-                              </div>
-                              {file.uploadDate && (
-                                <div className="flex items-center space-x-1 mt-1">
-                                  <Calendar className="h-3 w-3 text-muted-foreground" />
-                                  <span className="text-xs text-muted-foreground">{formatDate(file.uploadDate)}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              onDeleteFile(file.id)
-                            }}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </ScrollArea>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+          {/* File List */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Uploaded Documents</h3>
+              <Badge variant="outline">{completedFiles.length} files</Badge>
             </div>
 
-            {/* File Details */}
-            {selectedFile && (
-              <>
-                <Separator orientation="vertical" />
-                <div className="w-80 bg-slate-100 p-3">
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="font-semibold mb-2">File Details</h3>
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          {getFileIcon(selectedFile.type)}
-                          <span className="font-medium truncate">{selectedFile.name}</span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div>
-                            <span className="text-muted-foreground">Size:</span>
-                            <p className="font-medium">{formatFileSize(selectedFile.size)}</p>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Type:</span>
-                            <p className="font-medium">{selectedFile.type || "Unknown"}</p>
-                          </div>
-                        </div>
-
-                        {selectedFile.uploadDate && (
-                          <div>
-                            <span className="text-muted-foreground text-sm">Uploaded:</span>
-                            <p className="font-medium text-sm">{formatDate(selectedFile.uploadDate)}</p>
-                          </div>
-                        )}
-
-                        <div>
-                          <span className="text-muted-foreground text-sm">Status:</span>
-                          <div className="mt-1">{getStatusBadge(selectedFile.status)}</div>
-                        </div>
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-3">
+                {completedFiles.length === 0 ? (
+                  <Card>
+                    <CardContent className="flex items-center justify-center py-8">
+                      <div className="text-center">
+                        <File className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">No completed uploads yet</p>
                       </div>
-                    </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  completedFiles.map((file) => (
+                    <Card
+                      key={file.id}
+                      className={`cursor-pointer transition-colors ${
+                        selectedFile?.id === file.id ? "ring-2 ring-primary" : "hover:bg-muted/50"
+                      }`}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <File className="h-4 w-4 text-blue-500" />
+                              <p className="text-sm font-medium truncate">{file.name}</p>
+                            </div>
 
-                    <Separator />
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
+                              <span>{formatFileSize(file.size)}</span>
+                              {file.uploadDate && (
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  {file.uploadDate.toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
 
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Actions</h4>
-                      <div className="space-y-2">
-                        <Button variant="outline" className="w-full justify-start bg-transparent" size="sm">
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start bg-transparent"
-                          size="sm"
-                          onClick={() => handlePreview(selectedFile)}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Preview
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 bg-transparent"
-                          size="sm"
-                          onClick={() => onDeleteFile(selectedFile.id)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
+                            {getStatusBadge(file.status)}
+                          </div>
+
+                          <div className="flex items-center gap-1 ml-2">
+                            <Button variant="ghost" size="sm" onClick={() => handleView(file)} className="h-8 w-8 p-0">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDownload(file)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onDeleteFile(file.id)}
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* File Preview */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Preview</h3>
+
+            {selectedFile ? (
+              <Card className="h-[400px]">
+                <CardHeader>
+                  <CardTitle className="text-base">{selectedFile.name}</CardTitle>
+                  <CardDescription>
+                    {formatFileSize(selectedFile.size)} • {selectedFile.type}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <File className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground mb-4">PDF preview not available in this demo</p>
+                    <Button onClick={() => handleDownload(selectedFile)}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Download to View
+                    </Button>
                   </div>
-                </div>
-              </>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="h-[400px]">
+                <CardContent className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <Eye className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">Select a document to preview</p>
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </div>
+        </div>
 
-          <div className="flex justify-end">
-            <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <DocumentPreview isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} file={previewFile} />
-    </>
+        <div className="flex justify-end pt-4 border-t">
+          <Button onClick={onClose}>Close</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

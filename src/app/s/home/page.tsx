@@ -18,13 +18,7 @@ export default function SupplierHomePage() {
   const [isSaving, setIsSaving] = useState(false) 
   const documentUploadRef = useRef<DocumentUploadRef>(null)
 
-  const isFormValid =
-    invoiceNo.trim() !== "" &&
-    purchaseOrderNo.trim() !== "" &&
-    partNo.trim() !== "" &&
-    partName.trim() !== "" &&
-    documentType !== "" &&
-    selectedFiles.length > 0
+  const isFormValid = invoiceNo.trim() !== "" && purchaseOrderNo.trim() !== "" && partNo.trim() !== "" && partName.trim() !== "" && documentType !== "" && selectedFiles.length > 0
 
   const handleFilesChange = useCallback((files: File[]) => {
     setSelectedFiles(files)
@@ -43,12 +37,10 @@ export default function SupplierHomePage() {
         documentType,
       }
 
-      // Call the upload method from DocumentUpload component
       if (documentUploadRef.current?.uploadFiles) {
         await documentUploadRef.current.uploadFiles(formData)
       }
 
-      // Reset form after successful upload
       setInvoiceNo("")
       setPurchaseOrderNo("")
       setPartNo("")
@@ -56,11 +48,9 @@ export default function SupplierHomePage() {
       setDocumentType("")
       setSelectedFiles([])
 
-      // You can add a success toast here if needed
       console.log("Documents uploaded successfully!")
     } catch (error) {
       console.error("Error uploading documents:", error)
-      // You can add an error toast here if needed
     } finally {
       setIsSaving(false)
     }
