@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
             vendorCode: true
         }
     })
-    console.log(user)
+
     if(user_password !== user?.password || !user) {
         return NextResponse.json({
             success: false,
@@ -32,7 +32,9 @@ export async function POST(req: NextRequest) {
         })
     }
 
-    const token = jwt.sign({username,vendor_code: user.vendorCode}, process.env.JWT_SEC!)
+    const token = jwt.sign({username, user_type: user.type, vendor_code: user.vendorCode ?? 0, }, process.env.JWT_SEC!, {
+        algorithm:'HS256'
+    })
 
     
     let res =  NextResponse.json({
