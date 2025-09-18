@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { LogOut, User } from "lucide-react"
 import { useEffect, useState } from "react"
+import axios from "axios"
 
 export function Header() {
   const router = useRouter()
@@ -17,10 +18,12 @@ export function Header() {
     }
   }, [])
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn")
-    localStorage.removeItem("username")
-    router.push("/")
+  const handleLogout = async () => {
+    const response = await axios.post("/api/auth/sign_out",{})
+    if (response.data.success) {
+      localStorage.removeItem("token")
+      router.push("/signin")
+    }
   }
 
   return (
