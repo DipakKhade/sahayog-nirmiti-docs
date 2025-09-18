@@ -1,10 +1,12 @@
 "use client"
-import { DocumentUpload } from "@/components/document-upload"
+import { DocumentUpload, type DocumentUploadRef } from "@/components/document-upload"
 import { Header } from "@/components/header"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { useState, useRef, useCallback } from "react"
+import { Save, Loader2 } from "lucide-react"
 
 export default function SupplierHomePage() {
   const [invoiceNo, setInvoiceNo] = useState("")
@@ -12,6 +14,57 @@ export default function SupplierHomePage() {
   const [partNo, setPartNo] = useState("")
   const [partName, setPartName] = useState("")
   const [documentType, setDocumentType] = useState("")
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]) 
+  const [isSaving, setIsSaving] = useState(false) 
+  const documentUploadRef = useRef<DocumentUploadRef>(null)
+
+  const isFormValid =
+    invoiceNo.trim() !== "" &&
+    purchaseOrderNo.trim() !== "" &&
+    partNo.trim() !== "" &&
+    partName.trim() !== "" &&
+    documentType !== "" &&
+    selectedFiles.length > 0
+
+  const handleFilesChange = useCallback((files: File[]) => {
+    setSelectedFiles(files)
+  }, [])
+
+  const handleSave = async () => {
+    if (!isFormValid) return
+
+    setIsSaving(true)
+    try {
+      const formData = {
+        invoiceNo,
+        purchaseOrderNo,
+        partNo,
+        partName,
+        documentType,
+      }
+
+      // Call the upload method from DocumentUpload component
+      if (documentUploadRef.current?.uploadFiles) {
+        await documentUploadRef.current.uploadFiles(formData)
+      }
+
+      // Reset form after successful upload
+      setInvoiceNo("")
+      setPurchaseOrderNo("")
+      setPartNo("")
+      setPartName("")
+      setDocumentType("")
+      setSelectedFiles([])
+
+      // You can add a success toast here if needed
+      console.log("Documents uploaded successfully!")
+    } catch (error) {
+      console.error("Error uploading documents:", error)
+      // You can add an error toast here if needed
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
@@ -20,7 +73,6 @@ export default function SupplierHomePage() {
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">Upload Documents</h1>
-            {/* <p className="text-muted-foreground">Upload your documents securely</p> */}
           </div>
 
           <Card className="mb-6">
@@ -30,11 +82,15 @@ export default function SupplierHomePage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-4">
-                <Input placeholder="Invoice No" onChange={(e) => setInvoiceNo(e.target.value)} />
-                <Input placeholder="Purchase Order No" onChange={(e) => setPurchaseOrderNo(e.target.value)} />
-                <Input placeholder="Part No" onChange={(e) => setPartNo(e.target.value)} />
-                <Input placeholder="Part Name" onChange={(e) => setPartName(e.target.value)} />
-                <Select onValueChange={(value) => setDocumentType(value)}>
+                <Input placeholder="Invoice No" value={invoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} />
+                <Input
+                  placeholder="Purchase Order No"
+                  value={purchaseOrderNo}
+                  onChange={(e) => setPurchaseOrderNo(e.target.value)}
+                />
+                <Input placeholder="Part No" value={partNo} onChange={(e) => setPartNo(e.target.value)} />
+                <Input placeholder="Part Name" value={partName} onChange={(e) => setPartName(e.target.value)} />
+                <Select value={documentType} onValueChange={(value) => setDocumentType(value)}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select Document Type" />
                   </SelectTrigger>
@@ -49,15 +105,31 @@ export default function SupplierHomePage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="mb-6">
             <CardHeader>
               <CardTitle>Upload Files</CardTitle>
               <CardDescription>Drag and drop your documents or click to browse</CardDescription>
             </CardHeader>
             <CardContent>
-              <DocumentUpload />
+              <DocumentUpload ref={documentUploadRef} onFilesChange={handleFilesChange} />
             </CardContent>
           </Card>
+
+          <div className="flex justify-end">
+            <Button onClick={handleSave} disabled={!isFormValid || isSaving} size="lg" className="min-w-[120px]">
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </main>
     </div>
