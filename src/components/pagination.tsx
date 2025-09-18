@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { perPageRows } from "@/lib/config"
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
 
 interface PaginationProps {
@@ -20,10 +21,8 @@ export function Pagination({
   hasNext,
   hasPrev,
   onPageChange,
-  itemsPerPage = 10,
+  itemsPerPage = perPageRows,
 }: PaginationProps) {
-  const startItem = (currentPage - 1) * itemsPerPage + 1
-  const endItem = Math.min(currentPage * itemsPerPage, totalCount)
 
   // Generate page numbers to display
   const getPageNumbers = () => {
@@ -71,9 +70,9 @@ export function Pagination({
   }
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between mt-4">
       <div className="text-sm text-muted-foreground">
-        Showing {startItem} to {endItem} of {totalCount} results
+        Total {totalCount} results
       </div>
 
       <div className="flex items-center gap-2">
