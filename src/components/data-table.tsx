@@ -6,7 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight, Download } from "lucide-react"
 import axios from "axios"
-import { DocumentData } from "@/lib/types"
+import { DocumentData, PaginationData } from "@/lib/types"
+import { Pagination } from "./pagination"
 
 
 
@@ -15,6 +16,13 @@ export function DocumentTable() {
   const [currentPage, setCurrentPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [pagination, setPagination] = useState<PaginationData>({
+    currentPage: 1,
+    totalPages: 1,
+    totalCount: 0,
+    hasNext: false,
+    hasPrev: false,
+  })
 
   const fetchDocuments = async (page: number) => {
     setLoading(true)
@@ -24,6 +32,7 @@ export function DocumentTable() {
       const response = await axios.get(`/api/doc_details?page=${page}`)
       if (response.data) {
         setDocuments(response.data.data)
+        setPagination(response.data.pagination_data)
       } else {
         setError('Error fetching documents')
       }
@@ -103,16 +112,16 @@ export function DocumentTable() {
                     Loading documents...
                   </TableCell>
                 </TableRow>
-              ) : documents.length === 0 ? (
+              ) : documents && documents.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8">
                     No documents found
                   </TableCell>
                 </TableRow>
               ) : (
-                documents.map((document) => (
+                documents && documents.map((document) => (
                   <TableRow key={document.id}>
-                    <TableCell className="font-medium">{document.user.username}</TableCell>
+                    <TableCell className="font-medium">{document.user.name}</TableCell>
                     <TableCell>{document.user.vendorCode || "N/A"}</TableCell>
                     <TableCell>{document.invoiceNo}</TableCell>
                     <TableCell>{document.partName}</TableCell>
@@ -141,22 +150,10 @@ export function DocumentTable() {
             </TableBody>
           </Table>
         </div>
-
-        {/* Pagination Controls */}
-        <div className="flex items-center justify-between space-x-2 py-4">
-          <div className="text-sm text-muted-foreground">Page {currentPage}</div>
-          <div className="flex space-x-2">
-            <Button variant="outline" size="sm" onClick={handlePreviousPage} disabled={currentPage === 1 || loading}>
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleNextPage} disabled={loading}>
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        
+      <Pagination currentPage={pagination?.currentPage} totalPages={pagination?.totalPages} totalCount={pagination?.totalCount} hasNext={pagination?.hasNext} hasPrev={pagination?.hasPrev} onPageChange={(e)=>{console.log(e)}} />
       </CardContent>
+
     </Card>
   )
 }
