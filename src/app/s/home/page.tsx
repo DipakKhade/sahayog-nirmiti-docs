@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { useState, useRef, useCallback } from "react"
 import { Save, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 export default function SupplierHomePage() {
   const [invoiceNo, setInvoiceNo] = useState("")
@@ -48,7 +49,7 @@ export default function SupplierHomePage() {
       setDocumentType("")
       setSelectedFiles([])
 
-      console.log("Documents uploaded successfully!")
+      toast.success("Documents uploaded successfully!")
     } catch (error) {
       console.error("Error uploading documents:", error)
     } finally {
