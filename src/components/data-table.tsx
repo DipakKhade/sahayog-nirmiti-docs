@@ -77,13 +77,13 @@ export function DocumentTable() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Document Management</CardTitle>
-        <CardDescription>View and manage your uploaded documents</CardDescription>
+        {/* <CardTitle>Document Management</CardTitle>
+        <CardDescription>View and manage your uploaded documents</CardDescription> */}
       </CardHeader>
       <CardContent>
         <div className="rounded-md border">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-primary-foreground">
               <TableRow>
                 <TableHead>Supplier Name</TableHead>
                 <TableHead>Vendor Code</TableHead>
