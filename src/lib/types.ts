@@ -53,7 +53,14 @@ export interface Document {
     bucketKey: string
     createdAt: string
     user: {
-      username: string
+      name: string
       vendorCode: string | null
     }
+  }
+
+  export interface PaginationData {
+    totalPages: number,
+    totalCount: number,
+    hasNext: boolean,
+    hasPrev: boolean
   }
