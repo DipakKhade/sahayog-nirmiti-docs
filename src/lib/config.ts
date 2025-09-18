@@ -1,2 +1,4 @@
 
-export type userType = 'SUPPLIER' | 'ADMIN' 
+export type userType = 'SUPPLIER' | 'ADMIN'
+
+export const bucketName = 'sahayogn'
