@@ -25,14 +25,6 @@ export interface Document {
     documents: Document[]
   }
   
-  export interface PaginationData {
-    currentPage: number
-    totalPages: number
-    totalCount: number
-    hasNext: boolean
-    hasPrev: boolean
-  }
-  
   export interface SuppliersTableProps {
     documents: Document[]
     loading: boolean
