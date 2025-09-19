@@ -56,3 +56,8 @@ export interface Document {
     hasNext: boolean,
     hasPrev: boolean
   }
+
+  export interface FileItem {
+    key: string
+    url: string
+  }

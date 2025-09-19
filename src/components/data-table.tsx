@@ -4,14 +4,14 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronLeft, ChevronRight, Download } from "lucide-react"
+import { ChevronLeft, ChevronRight, Download, FilesIcon, View } from "lucide-react"
 import axios from "axios"
-import { DocumentData, PaginationData } from "@/lib/types"
+import { DocumentData, FileItem, PaginationData } from "@/lib/types"
 import { Pagination } from "./pagination"
+import { FileListModal } from "./file-list"
+import { toast } from "sonner"
 
-
-
-export function DocumentTable() {
+export function DataTable() {
   const [documents, setDocuments] = useState<DocumentData[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -23,10 +23,15 @@ export function DocumentTable() {
     hasPrev: false,
   })
 
+  const [showFiles, SetShowFiles] = useState<boolean>(false)
+
+  const [files, SetFiles] = useState<FileItem[]>([])
+
+
   const fetchDocuments = async (page: number) => {
     setLoading(true)
     setError(null)
-
+    toast.loading('loading ...')
     try {
       const response = await axios.get(`/api/doc_details?page=${page}`)
       if (response.data) {
@@ -41,14 +46,20 @@ export function DocumentTable() {
     } finally {
       setLoading(false)
     }
+
+    toast.dismiss()
   }
 
   useEffect(() => {
     fetchDocuments(currentPage)
   }, [currentPage])
 
-  const handleDownload = (document: DocumentData) => {
-    console.log("Download document:", document.bucketKey)
+  const handleViewFiles = async(document: DocumentData) => {
+    toast.loading('getting files..')
+    const response = await axios.get(`/api/doc_details/download?bucketKey=${document.bucketKey}`)
+    SetFiles(response.data.urls ?? [])
+    SetShowFiles(true)
+    toast.dismiss()
   }
 
   const formatDate = (dateString: string) => {
@@ -125,11 +136,11 @@ export function DocumentTable() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDownload(document)}
+                        onClick={() => handleViewFiles(document)}
                         className="h-8 w-8 p-0"
                       >
-                        <Download className="h-4 w-4" />
-                        <span className="sr-only">Download document</span>
+                        <FilesIcon className="h-4 w-4" />
+                        <span className="sr-only">documents</span>
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -138,26 +149,21 @@ export function DocumentTable() {
             </TableBody>
           </Table>
         </div>
-        {/* {
-            pagination && <Pagination currentPage={currentPage} totalPages={pagination?.totalPages} totalCount={pagination?.totalCount} hasNext={pagination?.hasNext} hasPrev={pagination?.hasPrev} onPageChange={(e)=>{
-                console.log(e)
-                setCurrentPage(e)
-            }} />
-        } */}
 
-<Pagination 
-  currentPage={currentPage} 
-  totalPages={pagination?.totalPages ?? 1} 
-  totalCount={pagination?.totalCount ?? 0} 
-  hasNext={pagination?.hasNext ?? false} 
-  hasPrev={pagination?.hasPrev ?? false} 
-  onPageChange={(e) => setCurrentPage(e)} 
-/>
-
-        
-      
+        <Pagination 
+        currentPage={currentPage} 
+        totalPages={pagination?.totalPages ?? 1} 
+        totalCount={pagination?.totalCount ?? 0} 
+        hasNext={pagination?.hasNext ?? false} 
+        hasPrev={pagination?.hasPrev ?? false} 
+        onPageChange={(e) => setCurrentPage(e)} 
+        />
 
       </CardContent>
+
+      {showFiles && <FileListModal isOpen={showFiles} onClose={()=>{
+        SetShowFiles(false)
+      }} files={files}/>}
 
     </Card>
   )

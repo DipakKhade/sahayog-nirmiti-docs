@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const dirKey = v4();
-        const uploadDir = path.join(process.cwd(), `uploads/ ${dirKey}`);
+        const uploadDir = path.join(process.cwd(), `uploads/${dirKey}`);
         if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
         
         const filePath = path.join(uploadDir, file.name);
