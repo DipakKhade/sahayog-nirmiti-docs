@@ -31,6 +31,7 @@ export async function GET(req: NextRequest) {
                         vendorCode: "asc"
                     }
                 },
+                skip:(+page - 1) * perPageRows,
                 take: perPageRows,
                 where: {
                     createdAt : {
@@ -39,8 +40,10 @@ export async function GET(req: NextRequest) {
                 }
             })
 
+
             const total_docs  = Math.ceil((await tx.document.count())/perPageRows);
-            const total_pages = total_docs / +page 
+
+            const total_pages = total_docs  
             const pagination_data = {
                 totalPages: total_pages,
                 hasNext: +page < total_pages,
