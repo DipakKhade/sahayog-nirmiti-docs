@@ -17,7 +17,6 @@ export function DocumentTable() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pagination, setPagination] = useState<PaginationData>({
-    currentPage: 1,
     totalPages: 1,
     totalCount: 0,
     hasNext: false,
@@ -48,18 +47,7 @@ export function DocumentTable() {
     fetchDocuments(currentPage)
   }, [currentPage])
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1)
-    }
-  }
-
-  const handleNextPage = () => {
-    setCurrentPage(currentPage + 1)
-  }
-
   const handleDownload = (document: DocumentData) => {
-    // Implement download logic here
     console.log("Download document:", document.bucketKey)
   }
 
@@ -150,8 +138,25 @@ export function DocumentTable() {
             </TableBody>
           </Table>
         </div>
+        {/* {
+            pagination && <Pagination currentPage={currentPage} totalPages={pagination?.totalPages} totalCount={pagination?.totalCount} hasNext={pagination?.hasNext} hasPrev={pagination?.hasPrev} onPageChange={(e)=>{
+                console.log(e)
+                setCurrentPage(e)
+            }} />
+        } */}
+
+<Pagination 
+  currentPage={currentPage} 
+  totalPages={pagination?.totalPages ?? 1} 
+  totalCount={pagination?.totalCount ?? 0} 
+  hasNext={pagination?.hasNext ?? false} 
+  hasPrev={pagination?.hasPrev ?? false} 
+  onPageChange={(e) => setCurrentPage(e)} 
+/>
+
         
-      <Pagination currentPage={pagination?.currentPage} totalPages={pagination?.totalPages} totalCount={pagination?.totalCount} hasNext={pagination?.hasNext} hasPrev={pagination?.hasPrev} onPageChange={(e)=>{console.log(e)}} />
+      
+
       </CardContent>
 
     </Card>
